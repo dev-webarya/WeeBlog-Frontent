@@ -8,7 +8,7 @@ Modern React frontend for the Blog Platform with beautiful gradients and glassmo
 - **Vite** - Fast build tool
 - **Tailwind CSS** - Utility-first styling with custom gradients
 - **React Router v6** - Client-side routing
-- **Axios** - HTTP client
+- **Axios** - HTTP client connection
 - **React Hot Toast** - Notifications
 - **Lucide React** - Modern icons
 - **Date-fns** - Date formatting
