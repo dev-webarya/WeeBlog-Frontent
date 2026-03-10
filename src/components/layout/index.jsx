@@ -98,19 +98,23 @@ export const Header = () => {
                         </nav>
                     ) : (
                         <nav className="flex items-center space-x-1">
-                            <NavLink to="/admin/dashboard" label="Dashboard" />
-                            <NavLink to="/admin/moderation" label="Moderate" />
-                            <NavLink to="/admin/sections" label="Sections" />
-                            <NavLink to="/admin/comments" label="Comments" />
-                            <NavLink to="/admin/subscribers" label="Subscribers" />
-                            {isAuthenticated && (
+                            {isAuthenticated ? (
                                 <>
+                                    <NavLink to="/admin/dashboard" label="Dashboard" />
+                                    <NavLink to="/admin/moderation" label="Moderate" />
+                                    <NavLink to="/admin/sections" label="Sections" />
+                                    <NavLink to="/admin/comments" label="Comments" />
+                                    <NavLink to="/admin/subscribers" label="Subscribers" />
                                     <div className="w-px h-6 bg-border-primary mx-1" />
                                     <button onClick={handleLogout} className="flex items-center space-x-2 px-4 py-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/10 text-red-500 transition-all text-sm font-medium">
                                         <LogOut className="w-4 h-4" />
                                         <span>Logout</span>
                                     </button>
                                 </>
+                            ) : (
+                                <Link to="/" className="flex items-center space-x-2 px-4 py-2 rounded-full hover:bg-neutral-300 dark:hover:bg-white/10 transition-all text-sm font-medium text-text-secondary">
+                                    <span>Return to Site</span>
+                                </Link>
                             )}
                         </nav>
                     )}
