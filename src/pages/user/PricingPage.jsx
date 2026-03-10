@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { pricingApi, checkoutApi } from '../../api/blogApi';
 import { useUserAuth } from '../../context/AuthContext';
 import { Card, Spinner, Button } from '../../components/ui';
@@ -17,6 +17,7 @@ const DURATION_LABELS = { '1M': '1 Month', '3M': '3 Months', '6M': '6 Months', '
 
 export const PricingPage = () => {
     const navigate = useNavigate();
+    const { state } = useLocation();
     const { isLoggedIn } = useUserAuth();
     const [pricing, setPricing] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -43,10 +44,36 @@ export const PricingPage = () => {
             navigate('/login');
             return;
         }
+
+        let finalBlogId = null;
+        let finalScopeId = null;
+
+        if (planType === 'PER_BLOG') {
+            if (!state?.blogId) {
+                toast.error('Please select a specific blog article to purchase first.');
+                return;
+            }
+            finalBlogId = state.blogId;
+        } else if (planType === 'SUBSCRIPTION_SUBSECTION') {
+            if (!state?.subsectionId) {
+                toast.error('Please initiate purchase from a specific subsection.');
+                return;
+            }
+            finalScopeId = state.subsectionId;
+        } else if (planType === 'SUBSCRIPTION_SECTION') {
+            if (!state?.sectionId) {
+                toast.error('Please initiate purchase from a specific section.');
+                return;
+            }
+            finalScopeId = state.sectionId;
+        }
+
         try {
             const r = await checkoutApi.createOrder({
                 planType,
                 duration: planType === 'PER_BLOG' ? null : duration,
+                blogId: finalBlogId,
+                scopeId: finalScopeId,
             });
             // Open Razorpay checkout
             const options = {

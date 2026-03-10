@@ -234,7 +234,7 @@ export const BlogDetailPage = () => {
                                     Unlock it with a single purchase or a subscription plan.
                                 </p>
                                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                                    <Button onClick={() => navigate('/pricing')} className="shadow-sm">
+                                    <Button onClick={() => navigate('/pricing', { state: { blogId: blog.id, sectionId: blog.sectionId, subsectionId: blog.subsectionId, title: blog.title } })} className="shadow-sm">
                                         <CreditCard className="w-4 h-4 inline mr-1.5" />
                                         View Plans & Unlock
                                     </Button>
