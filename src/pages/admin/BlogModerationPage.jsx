@@ -99,6 +99,9 @@ export const BlogModerationPage = () => {
                 title: editForm.title, excerpt: editForm.excerpt, contentHtml: editForm.contentHtml,
                 tags: typeof editForm.tags === 'string' ? editForm.tags.split(',').map(t => t.trim()) : editForm.tags,
                 featuredImageUrl: editForm.featuredImageUrl,
+                internalRating: editForm.internalRating,
+                sectionId: editForm.sectionId,
+                subsectionId: editForm.subsectionId
             });
             toast.success('Changes saved!');
             // Update the viewBlog with new data
@@ -116,8 +119,14 @@ export const BlogModerationPage = () => {
             title: blog.title, excerpt: blog.excerpt,
             contentHtml: blog.contentHtml || blog.content || '',
             tags: blog.tags?.join(', ') || '',
-            featuredImageUrl: blog.featuredImageUrl || ''
+            featuredImageUrl: blog.featuredImageUrl || '',
+            internalRating: blog.internalRating || 5,
+            sectionId: blog.sectionId || '',
+            subsectionId: blog.subsectionId || ''
         });
+        if (blog.sectionId) {
+            loadSubsections(blog.sectionId);
+        }
     };
 
     const toggleEdit = () => {
@@ -126,8 +135,14 @@ export const BlogModerationPage = () => {
                 title: viewBlog.title, excerpt: viewBlog.excerpt,
                 contentHtml: viewBlog.contentHtml || viewBlog.content || '',
                 tags: viewBlog.tags?.join(', ') || '',
-                featuredImageUrl: viewBlog.featuredImageUrl || ''
+                featuredImageUrl: viewBlog.featuredImageUrl || '',
+                internalRating: viewBlog.internalRating || 5,
+                sectionId: viewBlog.sectionId || '',
+                subsectionId: viewBlog.subsectionId || ''
             });
+            if (viewBlog.sectionId) {
+                loadSubsections(viewBlog.sectionId);
+            }
         }
         setIsEditing(!isEditing);
     };
@@ -187,6 +202,43 @@ export const BlogModerationPage = () => {
                                 )}
                             </div>
 
+                            {/* Section & Subsection */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-text-secondary mb-1.5">Section</label>
+                                    <select
+                                        className="w-full bg-transparent border border-border-primary rounded-lg px-4 py-2 text-text-primary outline-none focus:border-indigo-500 transition-colors"
+                                        value={editForm.sectionId}
+                                        onChange={(e) => {
+                                            const newSectionId = e.target.value;
+                                            setEditForm({ ...editForm, sectionId: newSectionId, subsectionId: '' });
+                                            loadSubsections(newSectionId);
+                                        }}
+                                        required
+                                    >
+                                        <option value="" disabled className="bg-bg-primary">Select a section</option>
+                                        {sections.map(s => (
+                                            <option key={s.id} value={s.id} className="bg-bg-primary">{s.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-text-secondary mb-1.5">Subsection</label>
+                                    <select
+                                        className="w-full bg-transparent border border-border-primary rounded-lg px-4 py-2 text-text-primary outline-none focus:border-indigo-500 transition-colors disabled:opacity-50"
+                                        value={editForm.subsectionId}
+                                        onChange={(e) => setEditForm({ ...editForm, subsectionId: e.target.value })}
+                                        disabled={!editForm.sectionId}
+                                        required
+                                    >
+                                        <option value="" disabled className="bg-bg-primary">Select a subsection</option>
+                                        {subsections.map(s => (
+                                            <option key={s.id} value={s.id} className="bg-bg-primary">{s.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
                             {/* Title */}
                             <div>
                                 <label className="block text-sm font-medium text-text-secondary mb-1.5">Title</label>
@@ -209,6 +261,30 @@ export const BlogModerationPage = () => {
                             <div>
                                 <label className="block text-sm font-medium text-text-secondary mb-1.5">Tags (comma separated)</label>
                                 <Input value={editForm.tags} onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })} placeholder="react, tutorial, web-dev" />
+                            </div>
+
+                            {/* Internal Rating */}
+                            <div className="bg-bg-tertiary/50 p-4 rounded-xl border border-border-secondary">
+                                <label className="block text-sm font-medium text-text-secondary mb-2">Internal Rating</label>
+                                <div className="flex items-center gap-3">
+                                    <input type="range" min="1" max="10" value={editForm.internalRating}
+                                        onChange={(e) => setEditForm({ ...editForm, internalRating: Number(e.target.value) })}
+                                        className="flex-1 accent-indigo-500" />
+                                    <span className={`text-xl font-bold w-8 text-center ${editForm.internalRating > 6 ? 'text-amber-500' : 'text-text-primary'}`}>
+                                        {editForm.internalRating}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2 mt-2">
+                                    {editForm.internalRating > 6 ? (
+                                        <span className="flex items-center gap-1.5 text-xs text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-full">
+                                            <Crown className="w-3 h-3" /> Premium — content will be paywalled
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center gap-1.5 text-xs text-text-tertiary">
+                                            <Star className="w-3 h-3" /> Free — fully accessible
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Content Editor */}
