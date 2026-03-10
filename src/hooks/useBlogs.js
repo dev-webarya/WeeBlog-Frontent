@@ -149,8 +149,14 @@ export const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        const auth = localStorage.getItem('adminAuth');
-        setIsAuthenticated(!!auth);
+        const checkAuth = () => {
+            const auth = localStorage.getItem('adminAuth');
+            setIsAuthenticated(!!auth);
+        };
+
+        checkAuth();
+        window.addEventListener('storage', checkAuth);
+        return () => window.removeEventListener('storage', checkAuth);
     }, []);
 
     const login = (username, password) => {
@@ -158,6 +164,10 @@ export const useAuth = () => {
         const expectedPass = import.meta.env.VITE_ADMIN_PASSWORD || 'SecureAdmin@2026';
 
         if (username === expectedUser && password === expectedPass) {
+            // Enforce strict segregation: if an admin logs in, nuke the user session
+            localStorage.removeItem('userToken');
+            window.dispatchEvent(new Event('storage'));
+
             localStorage.setItem('adminAuth', JSON.stringify({ username, password }));
             setIsAuthenticated(true);
             toast.success('Login successful!');

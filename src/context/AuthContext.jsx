@@ -16,7 +16,18 @@ export const AuthProvider = ({ children }) => {
         } else {
             setLoading(false);
         }
-    }, []);
+
+        // Listen for logouts from other tabs or admin login overrides
+        const syncStorage = () => {
+            const currentToken = localStorage.getItem('userToken');
+            if (!currentToken && token) {
+                setToken(null);
+                setUser(null);
+            }
+        };
+        window.addEventListener('storage', syncStorage);
+        return () => window.removeEventListener('storage', syncStorage);
+    }, [token]);
 
     const fetchProfile = async () => {
         try {
@@ -34,6 +45,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     const login = (jwt, userData) => {
+        // Enforce strict segregation: if a user logs in, nuke the admin session
+        localStorage.removeItem('adminAuth');
+        window.dispatchEvent(new Event('storage'));
+
         localStorage.setItem('userToken', jwt);
         setToken(jwt);
         setUser(userData);
