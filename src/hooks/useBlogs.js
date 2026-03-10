@@ -159,20 +159,31 @@ export const useAuth = () => {
         return () => window.removeEventListener('storage', checkAuth);
     }, []);
 
-    const login = (username, password) => {
-        const expectedUser = import.meta.env.VITE_ADMIN_USERNAME || 'admin';
-        const expectedPass = import.meta.env.VITE_ADMIN_PASSWORD || 'SecureAdmin@2026';
+    const login = async (username, password) => {
+        try {
+            // First, optimistically set the credentials in localStorage
+            // The Axios interceptor will use these for the subsequent request
+            const credentials = { username, password };
+            localStorage.setItem('adminAuth', JSON.stringify(credentials));
 
-        if (username === expectedUser && password === expectedPass) {
             // Enforce strict segregation: if an admin logs in, nuke the user session
             localStorage.removeItem('userToken');
             window.dispatchEvent(new Event('storage'));
 
-            localStorage.setItem('adminAuth', JSON.stringify({ username, password }));
+            // Make a test request to the backend to verify the credentials
+            // Assuming /api/admin/blogs works as a simple verification endpoint
+            // In a real app, there should ideally be a dedicated /api/admin/login endpoint
+            const { adminApi } = await import('../api/blogApi');
+            await adminApi.getAdminBlogs({ page: 0, size: 1 });
+
             setIsAuthenticated(true);
             toast.success('Login successful!');
             return true;
-        } else {
+        } catch (error) {
+            // If the request fails (e.g., 401 Unauthorized), the Axios response interceptor 
+            // will automatically remove 'adminAuth' from localStorage, but we can also clean up here.
+            localStorage.removeItem('adminAuth');
+            window.dispatchEvent(new Event('storage'));
             toast.error('Invalid credentials');
             return false;
         }

@@ -9,9 +9,9 @@ export const AdminLogin = () => {
     const { login } = useAuth();
     const [credentials, setCredentials] = useState({ username: '', password: '' });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const success = login(credentials.username, credentials.password);
+        const success = await login(credentials.username, credentials.password);
         if (success) {
             navigate('/admin/dashboard');
         }
